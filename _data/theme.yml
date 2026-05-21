@@ -95,8 +95,8 @@ bootswatch: darkly # leave blank or comment out for plain bootstrap
 
 # THEME FONTS
 base-font-size: 1.2em
-text-color: "#e6f2ff"
-link-color: "#0d6efd"
+text-color: "#ffffff"
+link-color: "#375a7f"
 base-font-family: # comment out for bootstrap defaults. e.g. Roboto
 font-cdn: # add font stylesheet, e.g. <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
 

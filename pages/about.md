@@ -8,7 +8,6 @@ credits: true
 # Look in _includes/feature for options to easily add features to the page
 ---
 
-{% include feature/jumbotron.html objectid="object 2" %}
 
 ## Project Description
 

@@ -4,9 +4,11 @@ creator,Creator,
 date,Date Created,
 description,Description,
 subject,Subjects,true
+hue,Hue,true,,
 location,Location
 latitude,Latitude
 longitude,Longitude
+medium,Medium,,
 source,Source
 identifier,Source Identifier,,
 type,Type,

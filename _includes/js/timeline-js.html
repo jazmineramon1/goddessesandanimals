@@ -1,13 +1,12 @@
 {%- if site.data.theme.icons -%}{% assign icons = site.data.theme.icons %}{% else %}
 {% assign cb_icons = site.pages | where: "name","cb-icons.svg" | first %}
 {% assign icons = cb_icons.icons %}{%- endif -%}
-{%- assign items = site.data[site.metadata] | where_exp: 'item','item.year' -%}
 <script>
 
 function makeCard(obj) {
     // find images and link
     // find item link
-    var itemHref = `{{ '/item.html' | relative_url }}?id=${obj.objectid}`;
+    var itemHref = obj.parentid ?  "{{ '/item.html' | relative_url | append: '?id=' }}" + obj.parentid + "#" + obj.objectid : "{{ '/item.html' | relative_url | append: '?id=' }}" + obj.objectid;
     // find images
     var thumbSrc;
     // add images or thumb for objects based on format
@@ -25,6 +24,12 @@ function makeCard(obj) {
         thumbSrc = '{{ "/assets/lib/icons/" | relative_url }}{{ icons.icon-video }}.svg';  
     } else if (obj.format.includes("pdf")) {
         thumbSrc = '{{ "/assets/lib/icons/" | relative_url }}{{ icons.icon-pdf }}.svg';
+    } else if (obj.format.includes("record")) {
+        thumbSrc = '{{ "/assets/lib/icons/" | relative_url }}{{ icons.icon-record }}.svg';
+    } else if (obj.format.includes("compound")) {
+        thumbSrc = '{{ "/assets/lib/icons/" | relative_url }}{{ icons.icon-compound-object }}.svg';
+    } else if (obj.format.includes("multiple")) {
+        thumbSrc = '{{ "/assets/lib/icons/" | relative_url }}{{ icons.icon-multiple }}.svg';
     } else {
         thumbSrc = '{{ "/assets/lib/icons/" | relative_url }}{{ icons.icon-default }}.svg';
     }  
@@ -32,16 +37,15 @@ function makeCard(obj) {
     if (obj.youtubeid || obj.format.includes("image")){
         var card = `<div class="col-lg-4 col-md-6">
             <a href="${itemHref}">
-                <img class="lazyload img-thumbnail" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3C/svg%3E" data-src="${thumbSrc}" alt="${obj.title}" data-bs-toggle="tooltip" data-bs-placement="bottom" title="${obj.title} | ${obj.date}">
+                <img class="lazyload img-thumbnail timeline-thumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3C/svg%3E" data-src="${thumbSrc}" alt="${obj.title}" data-bs-toggle="tooltip" data-bs-placement="bottom" title="${obj.title} | ${obj.date}">
             </a>
             </div>`;
-    }
-    else {
+    } else {
         var card = `<div class="col-lg-4 col-md-6">
             <a href="${itemHref}">
                 <div class="card"> 
                     <div class="card-body text-center">
-                        <h4 class="card-title text-dark">${obj.title}</h4>
+                        <div class="h5 text-dark">${obj.title}</div>
                         <img class="lazyload w-50" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3C/svg%3E" data-src="${thumbSrc}" alt="filetype thumbnail">
                     </div>
                 </div>
@@ -51,16 +55,28 @@ function makeCard(obj) {
     return card;
 }
 
-function pageInit(items) {
+var timelinePageInit = function (cb_items) {
+    {% unless site.data.theme.timeline-child-objects == true %}
+    // filter compound objects
+    var cb_items = cb_items.filter(item => !item.parentid);
+    {% endunless %}
     // get dates from metadata and clean to years
     clean_years = [];
-    for (var i = 0; i < items.length; i++) {
-        if (typeof items[i].date === "number") { clean_years.push(items[i].date); }
+    for (var i = 0; i < cb_items.length; i++) {
+        if(cb_items[i].date) { 
+            if(cb_items[i].date.includes("-")) {
+                clean_years.push(cb_items[i].date.trim().split("-")[0]);
+            } else if (cb_items[i].date.includes("/")) {
+                clean_years.push(cb_items[i].date.trim().split("/").reverse()[0]);
+            } else {
+                clean_years.push(cb_items[i].date.trim());
+            }
+        }
     }
     // find unique years 
     unique_years = clean_years.filter(function(value, index, self) { return self.indexOf(value) === index; }).sort((a, b) => a - b);
 
-    document.getElementById("yearRange").innerHTML = `<a href="#y${ unique_years[0] }">${ unique_years[0] < 0 ? unique_years[0]*-1 + ' BC' : unique_years[0] }</a> to <a href="#y${ unique_years[unique_years.length - 1] }">${ unique_years[unique_years.length - 1] < 0 ? unique_years[unique_years.length - 1]*-1 + ' BC' : unique_years[unique_years.length - 1] }</a>`;
+    document.getElementById("yearRange").innerHTML = `<a href="#y${ unique_years[0] }">${ unique_years[0] }</a> to <a href="#y${ unique_years[unique_years.length - 1] }">${ unique_years[unique_years.length - 1] }</a>`;
 
     // figure out navYears 
     var dropYears = "";
@@ -76,7 +92,7 @@ function pageInit(items) {
     }
     {% endif %}
     for (var i = 0; i < navYears.length; i++){
-        dropYears += `<a class="dropdown-item" href="#y${ navYears[i] }">${ navYears[i] < 0 ? navYears[i]*-1 + ' BC' : navYears[i] }</a>`;
+        dropYears += '<a class="dropdown-item" href="#y' + navYears[i] + '">' + navYears[i] + '</a>';
     }
     // add nav years dropdown
     document.getElementById("navDropYears").innerHTML = dropYears;
@@ -87,12 +103,12 @@ function pageInit(items) {
     for (var i = 0; i < unique_years.length; i++) {
         var years = "";
         // find items for the year
-        var yearItems = items.filter(item => item.date == unique_years[i]);
+        var yearItems = cb_items.filter(item => item.date.includes(unique_years[i]));
         // create cards for each
         var yearItemCards = "";
         yearItems.forEach((item) => { yearItemCards += makeCard(item); });
         // create table row for year
-        var yearRow = `<tr id="y${unique_years[i]}"><th><h3>${ unique_years[i] < 0 ? unique_years[i]*-1 + ' BC' : unique_years[i] }</h3></th><td><div class="row">${yearItemCards}</div></td></tr>`;
+        var yearRow = `<tr id="y${unique_years[i]}"><th><h3>${unique_years[i]}</h3></th><td><div class="row">${yearItemCards}</div></td></tr>`;
         // add to var
         yearTable += yearRow;
     }
@@ -104,20 +120,19 @@ function pageInit(items) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
 
-    // highlight year if hash
-    if(window.location.hash) {
-        var hashfilter = decodeURIComponent(location.hash.substr(1));
-        document.querySelector("tr#" + hashfilter).classList.add("bg-info");
+    // highlight active year row
+    function highlightYear() {
+        var hashfilter = "tr#" + decodeURIComponent(location.hash.substr(1));
+        document.querySelectorAll("table#timeline tr").forEach(row => { row.classList.remove('table-info'); });
+        if (document.querySelector(hashfilter)) { document.querySelector(hashfilter).classList.add("table-info"); }
     }
+    // if in initial hash
+    if (window.location.hash) { highlightYear(); }
+    // on hash change
+    window.addEventListener("hashchange", highlightYear);
 }
 
-
-/* add items */
-var items = [
-    {% for i in items %}
-    { "title":{{ i.title | strip | jsonify }}, "date": {{ i.year | times: 1 }}, "format":{% if i.format %}{{ i.format | jsonify }}{% else %}""{% endif %}, {% if i.youtubeid %} "youtube": {{ i.youtubeid | jsonify }}, {% endif %}{% if  i.filename contains '/' %}"filename": "{{ i.filename }}" {% else %}"filename":"{{ '/objects/' | relative_url | append: i.filename }}"{% endif %}, "objectid":{{ i.objectid | jsonify }} }{% unless forloop.last %},{% endunless %}{% endfor %}
-];
-/* init timeline */ 
-pageInit(items);
+// add feature function to includeFunctions array
+includeFunctions.push(timelinePageInit);
 
 </script>

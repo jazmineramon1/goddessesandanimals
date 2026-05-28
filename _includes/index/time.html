@@ -18,10 +18,7 @@
         var item_years = cb_items.map(obj => { 
             var d = obj["date"].trim();
             var year = "";
-            if (d.match(/^-?\d{4,}/)) {
-                // handles negative ISO dates like -0500-12-25 or just -500
-                year = d.match(/^-?\d+/)[0];
-            } else if (d.includes("-") && !d.startsWith("-")) {
+            if (d.includes("-")) {
                 year = d.split("-")[0];
             } else if (d.includes("/")) {
                 year = d.split("/").slice(-1);
@@ -32,12 +29,12 @@
         });
         // find start and end years
         var clean_years = item_years.filter(Boolean);
-        var start_year = clean_years.reduce((a, b) => a < b ? a : b);
-        var end_year = clean_years.reduce((a, b) => a > b ? a : b);
+        var start_year = Math.min(...clean_years);
+        var end_year = Math.max(...clean_years);
         // add to page
         document.getElementById("{{ functionName }}").innerHTML = start_year + "  to " + end_year;
     };
-    
+
     // add feature function to includeFunctions array
     if(includeFunctions) {
         includeFunctions.push({{ functionName }});

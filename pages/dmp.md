@@ -6,7 +6,6 @@ permalink: /dmp.html
 
 # Data Management Plan
 
-DSCI / LIB 350M: Humanities Research Data Management
 
 # Section 1: Project Overview
 

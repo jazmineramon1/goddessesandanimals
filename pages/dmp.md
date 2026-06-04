@@ -18,7 +18,7 @@ Lila spent a majority of the time finding the images online and filling in the m
 
 Jazmine added and filled out the rights statement column and the latitude and longitude column. Jazmine also helped go through the entire metadata to help make it compatible for GitHub. This involved fixing typos, adding more information, making things in the correct format, and checking for any more little mistakes that might have been made in the columns. Jazmine owns the GitHub page, so she was responsible for big edits and decisions with the site. She also helped organize, design, and code the different texts and tabs in the website, including the map and data management. 
 
-# Jazmine: Section 3: Data Inventory & Provenance 
+# Section 3: Data Inventory & Provenance 
 
 ## Source objects
 
@@ -67,7 +67,6 @@ We license our project content under CC BY 4.0. This allows others to share, reu
 
 The rights statement from source institutions affects what users can do with individual objects in the collection. Many were under Creative Commons law however some objects had more restrictive terms. Certain objects we had researched were under Copyright by certain institutions such as objects in the Boston Fine Arts Museum and Asian Art Museum which had ownership of all items in their online collection so required a fee and a submission form in order to use any images. 
 
-## 
 
 ## Ethical Considerations
 
